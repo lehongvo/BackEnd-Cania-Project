@@ -38,7 +38,15 @@ async function getAndFormatTransactionsFromBlock(blockNumber, provider) {
 
 const saveTransactionsFromBlockToDB = async () => {
     try {
-        const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL_BLOCKCHAIN);
+        const listRPC = [
+            "https://polygon-bor-amoy-rpc.publicnode.com",
+            "https://polygon-amoy.drpc.org",
+            "https://rpc-amoy.polygon.technology",
+            "https://rpc.ankr.com/polygon_amoy",
+            "https://api.tatum.io/v3/blockchain/node/polygon-amoy",
+        ];
+        const randomRPCURL = listRPC[Math.floor(Math.random() * listRPC.length)];
+        const provider = new ethers.providers.JsonRpcProvider(randomRPCURL);
         const blockNumber = await provider.getBlockNumber() - 1;
         console.log(blockNumber);
         const formattedTransactions = await getAndFormatTransactionsFromBlock(blockNumber, provider);

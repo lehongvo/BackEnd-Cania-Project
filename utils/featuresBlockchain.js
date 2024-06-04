@@ -15,7 +15,7 @@ function formatTransaction(transactionData) {
         value: transactionData.value.toString(), // Convert value to string
         gasPrice: transactionData.gasPrice.toString(), // Convert gasPrice to string
         gas: transactionData.gas != undefined ? transactionData.gas.toString() : undefined,
-        input: transactionData.data,
+        data: transactionData.data,
         v: transactionData.v,
         r: transactionData.r,
         s: transactionData.s,
@@ -36,23 +36,40 @@ async function getAndFormatTransactionsFromBlock(blockNumber, provider) {
     }
 }
 
-const saveTransactionsFromBlockToDB = async () => {
+const saveTransactionsFromBlockToDB = async (oldBlockNumber, latestBlockNumber) => {
     try {
         const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL_BLOCKCHAIN);
-        const blockNumber = await provider.getBlockNumber() - 1;
-        console.log(blockNumber);
-        const formattedTransactions = await getAndFormatTransactionsFromBlock(blockNumber, provider);
 
-        let transactionValue = [];
-        await Promise.all(formattedTransactions.map(async transactionData => {
-            transactionValue.push(transactionData);
-        }));
+        const promises = Array.from(
+            { length: latestBlockNumber - oldBlockNumber },
+            (_, i) => getAndFormatTransactionsFromBlock(oldBlockNumber + i, provider)
+        );
+
+        const results = await Promise.all(promises);
+        const transactionValue = results.flat();
+
+        console.log("Count:", transactionValue.length);
         return transactionValue;
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
+const networkData = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL_BLOCKCHAIN);
+    const blockNumber = Number(await provider.getBlockNumber()) - 10;
+    const network = await provider.getNetwork();
+    const chainId = network.chainId;
+    const block = await provider.getBlockWithTransactions(blockNumber);
+    return {
+        chainId,
+        timestamp: block.timestamp,
+        difficulty: block.difficulty,
+        blockNumber
+    };
+}
+
 module.exports = {
+    networkData,
     saveTransactionsFromBlockToDB
 }
