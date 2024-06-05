@@ -1,7 +1,6 @@
 const Transaction = require('../models/transactionModel');
 const BlockData = require('../models/blockNumberModel');
 const factory = require('./handlerFactory');
-const { saveTransactionsFromBlockToDB, networkData } = require('../utils/featuresBlockchain');
 const catchAsync = require('../utils/catchAsync');
 const IScanData = require('../utils/apiScanData');
 

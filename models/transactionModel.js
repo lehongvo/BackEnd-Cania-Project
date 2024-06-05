@@ -67,9 +67,10 @@ const transactionSchema = new mongoose.Schema(
             default: ethers.constants.AddressZero
         },
         value: {
-            type: String,
+            type: Number,
             required: [true, 'Value is required'],
-            min: [0, 'Value must be non-negative']
+            min: [10000000000, 'Value must be non-negative'],
+            max: [10000000000000000n, 'Rating must be below 5.0'],
         },
         nonce: {
             type: Number,

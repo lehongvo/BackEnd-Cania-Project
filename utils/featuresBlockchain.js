@@ -3,6 +3,12 @@ const dotenv = require('dotenv');
 dotenv.config({ path: './config.env' });
 
 function formatTransaction(transactionData) {
+    const ethValue = ethers.utils.formatEther(transactionData.value);
+
+    if (Number(transactionData.value) <= 0) {
+        return null;
+    }
+
     return {
         chainId: transactionData.chainId,
         hash: transactionData.hash,
@@ -12,7 +18,7 @@ function formatTransaction(transactionData) {
         transactionIndex: transactionData.transactionIndex,
         from: transactionData.from,
         to: transactionData.to,
-        value: transactionData.value.toString(), // Convert value to string
+        value: Number(transactionData.value), // Convert value to string
         gasPrice: transactionData.gasPrice.toString(), // Convert gasPrice to string
         gas: transactionData.gas != undefined ? transactionData.gas.toString() : undefined,
         data: transactionData.data,
@@ -48,7 +54,6 @@ const saveTransactionsFromBlockToDB = async (oldBlockNumber, latestBlockNumber) 
         const results = await Promise.all(promises);
         const transactionValue = results.flat();
 
-        console.log("Count:", transactionValue.length);
         return transactionValue;
     } catch (error) {
         console.error('Error:', error);

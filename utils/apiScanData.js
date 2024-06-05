@@ -25,9 +25,10 @@ const IScanData = async (req, res) => {
             await BlockData.create(newBlockData);
         }
 
-        const blockData = await saveTransactionsFromBlockToDB(
+        let blockData = await saveTransactionsFromBlockToDB(
             Number(oldBlock), Number(newBlockData.blockNumber)
         );
+        blockData = blockData.filter(block => block !== null);
 
         if (blockData.length > 0) {
             const insertPromises = blockData.map(async (tx) => {
@@ -48,15 +49,20 @@ const IScanData = async (req, res) => {
             });
 
             await Promise.all(insertPromises);
+
+            res.status(200).json({
+                status: 'success',
+                count: blockData.length,
+                message: 'Transactions added successfully',
+                data: {
+                    transactions: blockData
+                }
+            });
         }
 
         res.status(200).json({
             status: 'success',
-            count: blockData.length,
-            message: 'Transactions added successfully',
-            data: {
-                transactions: blockData
-            }
+            message: 'Empty Data'
         });
     } catch (error) {
         console.error('Error adding transactions to database:', error);
