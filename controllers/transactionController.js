@@ -15,7 +15,6 @@ exports.updateTransaction = factory.updateOne(Transaction);
 exports.deleteTransaction = factory.deleteOne(Transaction);
 
 exports.scanNewBlockDatabaseBlock = catchAsync(async (req, res) => {
-    await IScanData(req, res);
 });
 
 

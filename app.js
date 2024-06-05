@@ -21,8 +21,7 @@ app.use((req, res, next) => {
     next();
 });
 
-const job = schedule.scheduleJob('*/2 * * * * *', async () => {
-    console.log("------------------------------------------------------")
+const job = schedule.scheduleJob('*/10 * * * * *', async () => {
     console.log("Scheduled Task Triggered:", new Date().toDateString());
     try {
         const mockReq = {};
@@ -31,7 +30,7 @@ const job = schedule.scheduleJob('*/2 * * * * *', async () => {
                 json: (data) => console.log(`Mock response: ${code}`, data)
             })
         };
-        await IScanData(mockReq, mockRes);  // Passing mock objects
+        await IScanData(mockReq, mockRes);
     } catch (error) {
         console.error('Error during scheduled task execution:', error);
     }
@@ -39,8 +38,6 @@ const job = schedule.scheduleJob('*/2 * * * * *', async () => {
 });
 
 // 3) ROUTES
-// app.use('/api/v1/tours', tourRouter);
-// app.use('/api/v1/users', userRouter);
 app.use('/api/v1/transactions', transactionController);
 
 app.all('*', (req, res, next) => {

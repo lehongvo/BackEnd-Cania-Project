@@ -1,8 +1,9 @@
 const ethers = require('ethers');
 const dotenv = require('dotenv');
-dotenv.config({ path: './config.env' });
+dotenv.config()
 
-function formatTransaction(transactionData) {
+
+const formatTransaction = (transactionData) => {
     const ethValue = ethers.utils.formatEther(transactionData.value);
 
     if (Number(transactionData.value) <= 0) {
@@ -53,8 +54,8 @@ const saveTransactionsFromBlockToDB = async (oldBlockNumber, latestBlockNumber) 
 
         const results = await Promise.all(promises);
         const transactionValue = results.flat();
-
-        return transactionValue;
+        const blockData = transactionValue.filter(block => block !== null);
+        return blockData;
     } catch (error) {
         console.error('Error:', error);
     }
@@ -70,11 +71,42 @@ const networkData = async () => {
         chainId,
         timestamp: block.timestamp,
         difficulty: block.difficulty,
-        blockNumber
+        blockNumber,
+        parentHash: block.parentHash,
+        gasLimit: Number(block.gasLimit),
+        gasUsed: Number(block.gasUsed),
+        miner: block.miner,
+        baseFeePerGas: block.baseFeePerGas.toString(),
+        extraData: block.extraData.toString(),
+        nonce: block.nonce.toString(),
+        totalTransaction: block.transactions.length,
     };
+}
+
+const getBalanceWalletAddressToEth = async (walletAddress) => {
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL_BLOCKCHAIN);
+    const balance = await provider.getBalance(walletAddress);
+    return ethers.utils.formatEther(balance);
+}
+
+const getSymbolNetwork = (chainId) => {
+    switch (chainId) {
+        case 1:
+            return 'ETH';
+        case 11155111:
+            return 'Sepolia';
+        case 80002:
+            return 'AMOY';
+        case 137:
+            return 'MATIC';
+        default:
+            return 'Unknown';
+    }
 }
 
 module.exports = {
     networkData,
-    saveTransactionsFromBlockToDB
+    saveTransactionsFromBlockToDB,
+    getBalanceWalletAddressToEth,
+    getSymbolNetwork,
 }
